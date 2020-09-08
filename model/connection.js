@@ -21,15 +21,23 @@ var select = (emails,passwords)=>{
 }
 
 var student_task = (details)=>{
-    return knex.select("*").from("student_submited_task").insert(details)
+    return knex("student_submited_task").insert(details)
+}
+
+var selectFile = (tasks)=>{
+    return knex.select("id").from("student_submited_task").where("email",tasks)
 }
 
 var grade = (std_grade)=>{
     return knex.select("*").from("student_grade").insert(std_grade)
 }
+// Returns [ { id: 42, title: "The Hitchhiker's Guide to the Galaxy" } ]
+// knex('books')
+//   .where({ id: 42 })
+//   .update({ title: "The Hitchhiker's Guide to the Galaxy" }, ['id', 'title'])
 
-var confirm_data=(data)=>{
-    return knex.select("*").from("confirm_details").insert(data)
+var updateData=(data,ids)=>{
+    return knex("student_submited_task").where({ id: ids }).update(data)
     // .into("student_submited_task")
 }
 
@@ -57,4 +65,4 @@ const updatGrade=((id, collection)=> {
 
 
 
-module.exports={insert_token,select,student_task,grade,confirm_data,select_submit_data,updatGrade}
+module.exports={insert_token,selectFile,select,student_task,grade,updateData,select_submit_data,updatGrade}

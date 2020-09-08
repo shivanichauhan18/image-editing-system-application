@@ -14,28 +14,22 @@
         </style>  
     </head> 
     <body> 
-        <form action="/submit_once_data" method="POST" >
-        <h2> Please once Confirm Your name Email and user Id for submission</h2> 
 
+        <form action="/submit_once_data" method="POST" >
+        <h2> Please once Confirm Your name and image id for submission</h2> 
+        <p><b>Your reference id for image <%=data.id%></b></p>
         <br>
         <label for="name"><b>Name</b></label>
-        <input type="text" placeholder="Enter Email" name="name" required>
-        
+        <input type="text" placeholder="Enter name" name="name" required>
         <br>
-        <label for="email"><b>Email</b></label>
-        <input type="text" placeholder="Enter your Email" name="email" required>
-        <br>
-        <label for="name"><b>Enter your personal user Id</b></label>
+        <label for="name"><b>Enter your image reference id here</b></label>
         <input type="text" placeholder="user id" name="user_id" required>
-        
         <br>
-        
         <button>
                 <input type="submit">
                 </button>
 
-
-            <!-- </form> -->
+            </form>
     </body> 
 </html>    
 

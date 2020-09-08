@@ -1,0 +1,14 @@
+[
+    {
+        "name":"beginer",
+        "task":"cat image"
+    },
+    {
+        "name":"medium",
+        "task":"car image"
+    },
+    {
+        "name":"advanced",
+        "task":"create image with colour"
+    }
+]
