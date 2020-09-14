@@ -3,7 +3,6 @@ let fs = require("fs");
 const multer = require('multer');
 let ejs = require("ejs");
 const express = require('express');
-const fetch = require("node-fetch");
 const path = require('path');
 let pdf = require("html-pdf");
 var bodyParser = require("body-parser");
@@ -125,9 +124,6 @@ router.post("/upload_multiple_images", parser, function (req, res) {
                 email:req.body.email,
                 task: file.originalname
             }
-            // const data= {id:32}
-            // res.render("end.ejs",{ data:data })
-
             let response = knex1.student_task(studentDetails)
             response.then((results)=>{
                 
@@ -158,7 +154,7 @@ router.post("/submit_once_data", parser, function (req, res) {
     try{
     var studentDetails = {
         name: req.body.name,
-        user_id: req.body.user_id,
+        image_id: req.body.user_id,
     }
     let cluase = req.body.user_id
     let response = knex1.updateData(studentDetails,cluase)
@@ -186,6 +182,7 @@ router.get("/student_details", (req, res) => {
 router.get("/user_list", (req, res) => {
     let response = knex1.select_submit_data()
     response.then((data) => {
+        console.log(data)
         res.render('user_list', { title: 'User List', userData: data })
     }).catch((err) => {
         console.log(err)
