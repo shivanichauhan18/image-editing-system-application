@@ -1,0 +1,21 @@
+<div class="x_content">
+    <% obj.forEach(function (galery) { %>
+        <form id="demo-form2" data-parsley-validate class="form-horizontal form-label-left">
+            <div class="form-group">
+                <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">Motor Type : 
+                  </label>
+                <div class="col-md-6 col-sm-6 col-xs-12">
+                    <!-- <input type="text" id="first-name" required="required" class="form-control col-md-7 col-xs-12"> -->
+                    <label class="view-label col-md-7" for="first-name"><%= galery.motor_type %></label>
+                </div>
+            </div>
+            <p></p>
+<p aaaaaaaaaaaaaa><a href='"http://localhost:3500/ + <%= galery.task %>"'></a></p>
+              <img src='"http://localhost:3500/ + <%= galery.task %>"'
+                    alt="Italian Trull" width="400px" height="250px" id="img">
+                
+            </div>
+
+        </form>
+        <% }) %>
+</div>

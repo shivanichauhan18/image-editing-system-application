@@ -1,6 +1,6 @@
 const knex1 = require("../model/connection")
 let fs = require("fs");
-const multer = require('multer');
+// const multer = require('multer');
 let ejs = require("ejs");
 const express = require('express');
 const path = require('path');
@@ -8,6 +8,11 @@ let pdf = require("html-pdf");
 var bodyParser = require("body-parser");
 const parser = bodyParser.urlencoded({ extended: false })
 let router = express.Router()
+
+var fileUpload = require('express-fileupload');
+router.use(fileUpload());
+
+
 
 router.get('/introduction', function (req, res) {
     res.sendFile(path.join(__dirname + '/shivani.txt'));
@@ -98,31 +103,74 @@ router.post("/generateReport", (req, res) => {
     });
 })
 
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, path.join(__dirname + "/images/"));
-    },
-    // By default, multer removes file extensions so let's add them back
-    filename: function (req, file, cb) {
-        console.log(req.file)
-        cb(null, file.fieldname + '-' + Date.now() + ".jpg");
-    }
+// const storage = multer.diskStorage({
+//     destination: function (req, file, cb) {
+//         cb(null, path.join(__dirname + "/images/"));
+//     },
+//     // By default, multer removes file extensions so let's add them back
+//     filename: function (req, file, cb) {
+//         console.log(req.file)
+//         cb(null, file.fieldname + '-' + Date.now() + ".jpg");
+//     }
+// });
+
+// var upload = multer({
+//     storage: storage
+// }).single('myfile');
+
+router.post("/upload_multiple_images",parser,(req,res)=>{
+    try {
+        let file = req.files.myfile
+        // .team_image;
+        console.log(file)
+        if (file == undefined) {
+            return res.send(`You must select a file.`);
+        }
+        
+        if (file.mimetype == "image/jpeg" || file.mimetype == "image/png" || file.mimetype == "image/gif") {
+            let file_name = file.name;
+            console.log(file_name)
+            file.mv('images/'+file_name, function(err) {
+                        if (err) {
+                    if (err) throw err;
+                }
+                var studentDetails = {
+                    email:req.body.email,
+                    task: file_name
+                }
+                let response = knex1.student_task(studentDetails)
+                response.then((results)=>{
+                    
+                    if (Array.isArray(results) && results.length){
+                        let ids = results[0]
+                        let id = {id:ids}
+                        res.render("end.ejs",{data:id});
+                    }else{
+                        res.send("You have error in your image upload please check it.")
+                    }
+                })
+            })
+        }else {
+            message = "This format is not allowed , please upload file with '.png','.gif','.jpg'";
+            res.render('index.ejs', { message: message });
+         }
+        
+    } catch (err) {
+        console.log(err);
+    } 
 });
 
-var upload = multer({
-    storage: storage
-}).single('myfile');
-
-router.post("/upload_multiple_images", parser, function (req, res) {
+router.post("/upload_multiple_imagess", parser, function (req, res) {
     try {
         if (req.file == undefined) {
             return res.send(`You must select a file.`);
         }
-        const file = req.file
+        const file = req.file 
+        console.log(file)
         if (file.mimetype == "image/jpeg" || file.mimetype == "image/png" || file.mimetype == "image/gif") {
             var studentDetails = {
                 email:req.body.email,
-                task: file.originalname
+                task: file.path
             }
             let response = knex1.student_task(studentDetails)
             response.then((results)=>{
@@ -178,6 +226,17 @@ router.get("/student_details", (req, res) => {
     })
 })
 
+router.get('/getimage', function(req, res) {
+        let resp = knex1.selectTask()
+        resp.then((data) => {
+            console.log(data)
+            obj = JSON.parse(JSON.stringify(data));
+            console.log(obj)
+
+            res.render('view', { obj: obj });
+        // Send the image to the browser.
+    });
+});
 
 router.get("/user_list", (req, res) => {
     let response = knex1.select_submit_data()
@@ -189,7 +248,7 @@ router.get("/user_list", (req, res) => {
     })
 })
 
-router.post("/add_grade", (req, res) => {
+router.post("/add_grade", parser,(req, res) => {
     var grad = req.body.stu_grade
     var ids = req.body.stu_id
     console.log(ids, grad)

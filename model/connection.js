@@ -39,6 +39,10 @@ var select_submit_data = ()=>{
     return knex.select("name","email","task","grade").from("student_submited_task")
     .where("grade",0)
 }
+let selectTask=()=>{
+    return knex.select("task").from("student_submited_task")
+    .where("grade",0).limit(1).orderBy('id', 'desc')
+}
 const updatGrade=((id, collection)=> {
      var data = Array.isArray(id);
      if(data === true){
@@ -56,4 +60,4 @@ const updatGrade=((id, collection)=> {
 
 
 
-module.exports={insert_token,selectFile,select,student_task,grade,updateData,select_submit_data,updatGrade}
+module.exports={insert_token,selectTask,selectFile,select,student_task,grade,updateData,select_submit_data,updatGrade}

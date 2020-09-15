@@ -56,13 +56,15 @@
         <td><%=i; %></td>
         <td><%=data.name %></td>
         <td><%=data.email %></td>
-        <td><%=data.task %></td>
-        < 
-          <td><input type="text" placeholder="give grade to student" name="stu_grade" required> </td>
-          <td><input type="text" placeholder="enter you Email" name="stu_id" required></td>
+        <td> <img src="<%=data.task%>" height="440" width="490"/></td>
+        
+          <td><input id="grade" type="number" placeholder="enter grade" name="stu_grade" min="0" max="5" required>
+          <td><input type="text" placeholder="enter student Email" name="stu_id" required></td>
           <!-- <td><a href="/user/edit/<%=data.id%>">Edit</a></td>
             <td><a href="/user/delete/<%=data.id%>">Delete</a></td> -->
       </tr>
+      
+
       <%  i++; }) %>
       <% } else{ %>
       <tr>
@@ -70,11 +72,18 @@
       </tr>
       <% } %>
     </table>
+    <!-- <div class="col-md-3 col-lg-3 "> 
+      <img alt="User Pic" src="images/"+<%=userData[0].task%> class="img-circle img-responsive"> </div>
+      <p>ppppppppppppp</p>
+      <img src="<%=userData[0].task%>"/> -->
+
+
     <br>
     <button type="submit" class="loginbtn">submit      
       </button></form>
   </div>
- 
+
 </body>
 
 </html>
+
