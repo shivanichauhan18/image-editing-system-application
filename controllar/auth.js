@@ -6,7 +6,9 @@ const express = require('express');
 const path = require('path');
 let pdf = require("html-pdf");
 var bodyParser = require("body-parser");
-const parser = bodyParser.urlencoded({ extended: false })
+const parser = bodyParser.urlencoded({
+    extended: false
+})
 let router = express.Router()
 
 var fileUpload = require('express-fileupload');
@@ -37,8 +39,12 @@ router.get("/intermediate", (req, res) => {
 
 })
 
-router.get("/shivani",(req,res)=>{
-    res.render("end",{data:{id:30}})
+router.get("/shivani", (req, res) => {
+    res.render("end", {
+        data: {
+            id: 30
+        }
+    })
 })
 
 router.get("/advanced_student", (req, res) => {
@@ -73,7 +79,9 @@ router.post("/student_task", parser, (req, res) => {
 
 router.post("/generateReport", (req, res) => {
     var foo = require('./view/shivi.json');
-    ejs.renderFile(path.join(__dirname, './views/', "report-template.ejs"), { students: foo }, (err, data) => {
+    ejs.renderFile(path.join(__dirname, './views/', "report-template.ejs"), {
+        students: foo
+    }, (err, data) => {
         if (err) {
             res.send(err);
         } else {
@@ -93,8 +101,7 @@ router.post("/generateReport", (req, res) => {
                 stream2.on('end', function () {
                     try {
                         fs.unlink(mergeFileRes)
-                    }
-                    catch (err) {
+                    } catch (err) {
                         console.log(3090, "Did not delete file");
                     }
                 })
@@ -118,7 +125,7 @@ router.post("/generateReport", (req, res) => {
 //     storage: storage
 // }).single('myfile');
 
-router.post("/upload_multiple_images",parser,(req,res)=>{
+router.post("/upload_multiple_images", parser, (req, res) => {
     try {
         let file = req.files.myfile
         // .team_image;
@@ -126,38 +133,44 @@ router.post("/upload_multiple_images",parser,(req,res)=>{
         if (file == undefined) {
             return res.send(`You must select a file.`);
         }
-        
+
         if (file.mimetype == "image/jpeg" || file.mimetype == "image/png" || file.mimetype == "image/gif") {
             let file_name = file.name;
             console.log(file_name)
-            file.mv('images/'+file_name, function(err) {
-                        if (err) {
+            file.mv('images/' + file_name, function (err) {
+                if (err) {
                     if (err) throw err;
                 }
                 var studentDetails = {
-                    email:req.body.email,
+                    email: req.body.email,
                     task: file_name
                 }
                 let response = knex1.student_task(studentDetails)
-                response.then((results)=>{
-                    
-                    if (Array.isArray(results) && results.length){
+                response.then((results) => {
+
+                    if (Array.isArray(results) && results.length) {
                         let ids = results[0]
-                        let id = {id:ids}
-                        res.render("end.ejs",{data:id});
-                    }else{
+                        let id = {
+                            id: ids
+                        }
+                        res.render("end.ejs", {
+                            data: id
+                        });
+                    } else {
                         res.send("You have error in your image upload please check it.")
                     }
                 })
             })
-        }else {
+        } else {
             message = "This format is not allowed , please upload file with '.png','.gif','.jpg'";
-            res.render('index.ejs', { message: message });
-         }
-        
+            res.render('index.ejs', {
+                message: message
+            });
+        }
+
     } catch (err) {
         console.log(err);
-    } 
+    }
 });
 
 router.post("/upload_multiple_imagess", parser, function (req, res) {
@@ -165,27 +178,33 @@ router.post("/upload_multiple_imagess", parser, function (req, res) {
         if (req.file == undefined) {
             return res.send(`You must select a file.`);
         }
-        const file = req.file 
+        const file = req.file
         console.log(file)
         if (file.mimetype == "image/jpeg" || file.mimetype == "image/png" || file.mimetype == "image/gif") {
             var studentDetails = {
-                email:req.body.email,
+                email: req.body.email,
                 task: file.path
             }
             let response = knex1.student_task(studentDetails)
-            response.then((results)=>{
-                
-                if (Array.isArray(results) && results.length){
+            response.then((results) => {
+
+                if (Array.isArray(results) && results.length) {
                     let ids = results[0]
-                    let id = {id:ids}
-                    res.render("end.ejs",{data:id});
-                }else{
+                    let id = {
+                        id: ids
+                    }
+                    res.render("end.ejs", {
+                        data: id
+                    });
+                } else {
                     res.send("You have error in your image upload please check it.")
                 }
             })
-        }else{
+        } else {
             message = "This format is not allowed , please upload file with '.png','.gif','.jpg'";
-            res.render('index.ejs', { message: message });
+            res.render('index.ejs', {
+                message: message
+            });
         }
         upload(req, res, function (err) {
             if (err) {
@@ -199,41 +218,46 @@ router.post("/upload_multiple_imagess", parser, function (req, res) {
 
 
 router.post("/submit_once_data", parser, function (req, res) {
-    try{
-    var studentDetails = {
-        name: req.body.name,
-        image_id: req.body.user_id,
+    try {
+        var studentDetails = {
+            name: req.body.name,
+            image_id: req.body.user_id,
+        }
+        let cluase = req.body.user_id
+        let response = knex1.updateData(studentDetails, cluase)
+        response.then((data) => {
+            res.send(
+                "Your image successfully added instrocture will check your image. Thank You"
+            )
+        })
+    } catch (err) {
+        res.send(err)
     }
-    let cluase = req.body.user_id
-    let response = knex1.updateData(studentDetails,cluase)
-    response.then((data) => {
-        res.send(
-            "Your image successfully added instrocture will check your image. Thank You"
-        )
-    })
-}catch(err){
-    res.send(err)
-}
 });
 
 
 router.get("/student_details", (req, res) => {
     let response = knex1.select_submit_data()
     response.then((data) => {
-        res.render('student_details', { title: 'User List', userData: data })
+        res.render('student_details', {
+            title: 'User List',
+            userData: data
+        })
     }).catch((err) => {
         console.log(err)
     })
 })
 
-router.get('/getimage', function(req, res) {
-        let resp = knex1.selectTask()
-        resp.then((data) => {
-            console.log(data)
-            obj = JSON.parse(JSON.stringify(data));
-            console.log(obj)
+router.get('/getimage', function (req, res) {
+    let resp = knex1.selectTask()
+    resp.then((data) => {
+        console.log(data)
+        obj = JSON.parse(JSON.stringify(data));
+        console.log(obj)
 
-            res.render('view', { obj: obj });
+        res.render('view', {
+            obj: obj
+        });
         // Send the image to the browser.
     });
 });
@@ -241,25 +265,37 @@ router.get('/getimage', function(req, res) {
 router.get("/user_list", (req, res) => {
     let response = knex1.select_submit_data()
     response.then((data) => {
-        console.log(data)
-        res.render('user_list', { title: 'User List', userData: data })
+        if (data.length > 0) {
+            console.log(data)
+            res.render('user_list', {
+                title: 'User List',
+                userData: data
+            })
+        } else {
+            res.send("You checked all student assignment. there is nothing.")
+        }
+
     }).catch((err) => {
         console.log(err)
     })
 })
 
-router.post("/add_grade", parser,(req, res) => {
-    var grad = req.body.stu_grade
-    var ids = req.body.stu_id
-    console.log(ids, grad)
-    const quries = knex1.updatGrade(ids, grad)
-    quries.then((data) => {
-        console.log(data)
-        res.send("You give grade to all")
-    }).catch((err) => {
-        console.log(err)
-        res.send(err)
-    })
+router.post("/add_grade", parser, (req, res) => {
+    try {
+        var grad = req.body.stu_grade
+        var ids = req.body.stu_id
+        const quries = knex1.updatGrade(ids, grad)
+        quries.then((data) => {
+            console.log(data)
+            res.send("You give grade to all")
+        }).catch((err) => {
+            console.log(err)
+            res.send(err)
+        })
+    } catch (er) {
+        console.log(er)
+        res.send(er)
+    }
 
 
 })

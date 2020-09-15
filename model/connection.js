@@ -41,23 +41,27 @@ var select_submit_data = ()=>{
 }
 let selectTask=()=>{
     return knex.select("task").from("student_submited_task")
-    .where("grade",0).limit(1).orderBy('id', 'desc')
+    .where("grade",0).limit(1)
 }
-const updatGrade=((id, collection)=> {
-     var data = Array.isArray(id);
-     if(data === true){
-        const updateAll = []
-        for (var i = 0,max = collection.length; i<max; i+=1){
-           const query = knex("student_submited_task").where('email',id[i]).update({"grade":collection[i]})
-           updateAll.push(query)  
-        } 
-        return Promise.all(updateAll)
-     }
-     else{
-        return knex("student_submited_task").where("email",id).update({"grade":collection})
-     }
- })
+
+const check_mail = (email)=>{
+    return knex('users').count('*', {as: 'cnt'}).where("email",email)
+}
+
+ const updatGrade=((id, collection)=> {
+    var data = Array.isArray(id);
+    if(data === true){
+       const updateAll = []
+       for (var i = 0,max = collection.length; i<max; i+=1){
+          const query = knex("student_submited_task").where('email',id[i]).update({"grade":collection[i]})
+          updateAll.push(query)  
+       } 
+       return Promise.all(updateAll)
+    }
+    else{
+       return knex("student_submited_task").where("email",id).update({"grade":collection})
+    }
+})
 
 
-
-module.exports={insert_token,selectTask,selectFile,select,student_task,grade,updateData,select_submit_data,updatGrade}
+module.exports={check_mail,insert_token,selectTask,selectFile,select,student_task,grade,updateData,select_submit_data,updatGrade}

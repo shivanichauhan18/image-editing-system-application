@@ -1,8 +1,9 @@
 const express = require("express")
 const path = require('path');   
 const bodyParser = require("body-parser");
-// const multer = require('multer');
 const fs = require("fs")
+var jwt = require('jsonwebtoken');
+
 const app = express();
 app.use(bodyParser.json())
 app.set("views", path.join(__dirname, "views"))
@@ -15,7 +16,6 @@ const route = require("./controllar/auth")
 const auth = require("./controllar/authentic")
 app.use("/",route)
 app.use("/",auth)
-// app.use("/",file)
 
 
 

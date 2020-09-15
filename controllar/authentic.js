@@ -1,9 +1,11 @@
 let knex1 = require("../model/connection")
-const path = require('path');   
+const path = require('path');
 let jwt = require('jsonwebtoken');
 const router = require('express').Router();
 const bodyParser = require('body-parser')
-const urlencodedParser = bodyParser.urlencoded({ extended: false });
+const urlencodedParser = bodyParser.urlencoded({
+    extended: false
+});
 
 
 router.get('/create_user_account', function (req, res) {
@@ -15,40 +17,54 @@ router.get("/login_account", function (req, res) {
 })
 
 
-router.post("/user_account",urlencodedParser, (req, res)=>{
-    let psd = req.body.password
-    let rep_pwd = req.body.rpw
-    let n = psd.localeCompare(rep_pwd);
-    if (n == 1) {
-        res.send({ "password": "you enter repeat password is wrong" })
-    } else if (n == 0) {
-        let userDetails = {
-            name: req.body.name,
-            email: req.body.email,
-            password: psd,
-            confirm_psw: rep_pwd,
-            user_id: req.body.user_id,
-            stage: req.body.stage
-        }
+router.post("/user_account", urlencodedParser, (req, res) => {
+    let mail = req.body.email
+    let resp = knex1.check_mail(mail)
+    resp.then((result) => {
+        let value=result[0]
+        if (value.cnt > 0) {
+            res.send("Your Email is already exist. try other Email")
+        } else {
+            let psd = req.body.password
+            let rep_pwd = req.body.rpw
+            let n = psd.localeCompare(rep_pwd);
+            if (n == 1) {
+                res.send({
+                    "password": "you enter repeat password is wrong"
+                })
+            } else if (n == 0) {
+                let userDetails = {
+                    name: req.body.name,
+                    email: mail,
+                    password: psd,
+                    confirm_psw: rep_pwd,
+                    user_id: req.body.user_id,
+                    stage: req.body.stage
+                }
 
-        let response = knex1.insert_token(userDetails)
-        response.then((data) => {
-            res.redirect("/login_account")
-        }).catch((err) => {
-            console.log(err)
-            res.send(err)
-        })
-    }
+                let response = knex1.insert_token(userDetails)
+                response.then((data) => {
+                    res.redirect("/login_account")
+                }).catch((err) => {
+                    console.log(err)
+                    res.send(err)
+                })
+            }
+        }
+    }).catch((err) => {
+        console.log(err)
+        res.send(err)
+    })
 })
 
 
-router.post("/login",urlencodedParser, function (req, res) {
+router.post("/login", urlencodedParser, function (req, res) {
     let emails = req.body.email;
     let passwords = req.body.password;
     let stages = req.body.browser
     let uid = req.body.user_id
 
-    console.log(emails,passwords,stages,uid)
+    console.log(emails, passwords, stages, uid)
 
 
     let response = knex1.select(emails, passwords)
@@ -56,10 +72,11 @@ router.post("/login",urlencodedParser, function (req, res) {
         // console.log(data)
         if (data.length == 0) {
             res.send("your email is incorrect...")
-        }
-        else if (data[0]["password"] === passwords) {
+        } else if (data[0]["password"] === passwords) {
             console.log("aaya")
-            let token = jwt.sign({ "user": data[0] }, "secret_key")
+            let token = jwt.sign({
+                "user": data[0]
+            }, "secret_key")
             jwt.verify(token, "secret_key", (err, rsult) => {
                 if (data[0]["user_id"] == uid && stages == "student") {
                     console.log("succesfully login")

@@ -224,3 +224,101 @@ router.post("/add_grade",parser, (req, res) => {
 
 // })
 module.exports = router
+
+
+
+/// using multer file upload
+
+// const storage = multer.diskStorage({
+//     destination: function (req, file, cb) {
+//         cb(null, path.join(__dirname + "/images/"));
+//     },
+//     // By default, multer removes file extensions so let's add them back
+//     filename: function (req, file, cb) {
+//         console.log(req.file)
+//         cb(null, file.fieldname + '-' + Date.now() + ".jpg");
+//     }
+// });
+
+// var upload = multer({
+//     storage: storage
+// }).single('myfile');
+
+
+router.post("/upload_multiple_imagess", parser, function (req, res) {
+    try {
+        if (req.file == undefined) {
+            return res.send(`You must select a file.`);
+        }
+        const file = req.file
+        console.log(file)
+        if (file.mimetype == "image/jpeg" || file.mimetype == "image/png" || file.mimetype == "image/gif") {
+            var studentDetails = {
+                email: req.body.email,
+                task: file.path
+            }
+            let response = knex1.student_task(studentDetails)
+            response.then((results) => {
+
+                if (Array.isArray(results) && results.length) {
+                    let ids = results[0]
+                    let id = {
+                        id: ids
+                    }
+                    res.render("end.ejs", {
+                        data: id
+                    });
+                } else {
+                    res.send("You have error in your image upload please check it.")
+                }
+            })
+        } else {
+            message = "This format is not allowed , please upload file with '.png','.gif','.jpg'";
+            res.render('index.ejs', {
+                message: message
+            });
+        }
+        upload(req, res, function (err) {
+            if (err) {
+                return res.send("Something went wrong!");
+            }
+        });
+    } catch (err) {
+        console.log(err);
+    }
+});
+
+
+
+router.get('/getimage', function (req, res) {
+    let resp = knex1.selectTask()
+    resp.then((data) => {
+        console.log(data)
+        obj = JSON.parse(JSON.stringify(data));
+        console.log(obj)
+
+        res.render('view', {
+            obj: obj
+        });
+        // Send the image to the browser.
+    });
+});
+
+
+.post("/submission_data",(req,res)=>{
+    if (req.url == '/fileupload') {
+        var form = new formidable.IncomingForm();
+        form.parse(req, function (err, fields, files) {
+          res.write('File uploaded');
+          res.send();
+        });
+      } else {
+        res.writeHead(200, {'Content-Type': 'text/html'});
+        res.write('<form action="fileupload" method="post" enctype="multipart/form-data">');
+        res.write('<input type="file" name="filetoupload"><br>');
+        res.write('<input type="submit">');
+        res.write('</form>');
+        return res.send();
+      }
+})
+
