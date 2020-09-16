@@ -1,6 +1,7 @@
 let knex1 = require("../model/connection")
 const path = require('path');
 let jwt = require('jsonwebtoken');
+let config = require("../config/config")
 const router = require('express').Router();
 const bodyParser = require('body-parser')
 const urlencodedParser = bodyParser.urlencoded({
@@ -21,7 +22,7 @@ router.post("/user_account", urlencodedParser, (req, res) => {
     let mail = req.body.email
     let resp = knex1.check_mail(mail)
     resp.then((result) => {
-        let value=result[0]
+        let value = result[0]
         if (value.cnt > 0) {
             res.send("Your Email is already exist. try other Email")
         } else {
@@ -41,7 +42,6 @@ router.post("/user_account", urlencodedParser, (req, res) => {
                     user_id: req.body.user_id,
                     stage: req.body.stage
                 }
-
                 let response = knex1.insert_token(userDetails)
                 response.then((data) => {
                     res.redirect("/login_account")
@@ -63,33 +63,41 @@ router.post("/login", urlencodedParser, function (req, res) {
     let passwords = req.body.password;
     let stages = req.body.browser
     let uid = req.body.user_id
-
-    console.log(emails, passwords, stages, uid)
-
-
     let response = knex1.select(emails, passwords)
-    response.then((data) => {
-        // console.log(data)
-        if (data.length == 0) {
+    response.then((results) => {
+        if (results.length == 0) {
             res.send("your email is incorrect...")
-        } else if (data[0]["password"] === passwords) {
-            console.log("aaya")
-            let token = jwt.sign({
-                "user": data[0]
-            }, "secret_key")
-            jwt.verify(token, "secret_key", (err, rsult) => {
-                if (data[0]["user_id"] == uid && stages == "student") {
-                    console.log("succesfully login")
-                    res.redirect("/login_account")
-                    // res.sendFile(path.join(__dirname+"/view/introduction.html"))
-
-                } else if ("instrouctore" == stages) {
-                    console.log("nhi aaya")
-                    res.redirect("/instractor_page")
+        } else {
+            var data = JSON.stringify(results);
+            let expiresIn = 3600
+            config.payload.data = data
+            jwt.sign(config.payload, config.secret, {
+                algorithm: 'HS256',
+                expiresIn: expiresIn
+            }, function (err, token) {
+                if (err) {
+                    console.log('Error occurred while generating token');
+                    console.log(err);
+                    return false;
                 } else {
-                    console.log("bhai majburi")
-                    res.send("you are not a instructor")
-
+                    if (token != false) {
+                        jwt.verify(token, config.secret, (err, rsult) => {
+                            if (err) {
+                                res.sendStatus(403);
+                            } else {
+                                if (results[0]["user_id"] == uid && stages == "student") {
+                                    res.redirect("/login_account")
+                                } else if ("instrouctore" == stages) {
+                                    res.redirect("/instractor_page")
+                                } else {
+                                    res.send("you are not a instructor")
+                                }
+                            }
+                        })
+                    } else {
+                        res.send("Could not create token");
+                        res.end();
+                    }
                 }
             })
         }
